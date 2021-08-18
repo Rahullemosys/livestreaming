@@ -51,23 +51,29 @@ export const Join = (props) => {
     const navigation = useNavigation();
 
     const [joined, setJoined] = useState(false);
+
     const isBroadcaster = props.route.params.type === 'create';
+
     const AgoraEngine = useRef();
+
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
     );
+
     const init = async () => {
+
         AgoraEngine.current = await RtcEngine.create(
             'ad07b133744c43049fa339692513e594',
         );
+        
         AgoraEngine.current.enableVideo();
+
         AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting);
-        if (isBroadcaster)
 
         AgoraEngine.current.setClientRole(ChannelProfile.LiveBroadcasting);
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
-            if (uid === 1) setBroadcasterVideoState(state);
+            if (uid === 0) setBroadcasterVideoState(state);
         });
 
         AgoraEngine.current.addListener(
@@ -81,7 +87,9 @@ export const Join = (props) => {
 
     useEffect(() => {
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
+
         const uid = isBroadcaster ? 1 : 0;
+
         init().then(() =>
             AgoraEngine.current.joinChannel(
                 null,

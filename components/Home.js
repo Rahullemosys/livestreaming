@@ -13,8 +13,9 @@ export function Home() {
   const navigation = useNavigation();
 
 
-  const createLive = () =>
+  const createLive = () => {
     navigation.navigate('Live', { type: 'create', channel: uuid() });
+  }
 
   const onAdd = () =>
     navigation.navigate('AddStream');
@@ -22,6 +23,9 @@ export function Home() {
   const onJoin = () =>
     navigation.navigate('WatchStream');
 
+const onVideo = () => {
+  navigation.navigate('Video');
+}
 
   return (
     <View style={styles.container}>
@@ -42,6 +46,14 @@ export function Home() {
 
           <TouchableOpacity onPress={onJoin} style={styles.borderStream}>
             <Text style={styles.buttonText}>Join Stream</Text>
+          </TouchableOpacity>
+
+        </View>
+
+        <View style={styles.video}>
+
+          <TouchableOpacity onPress={onVideo} style={styles.borderStream}>
+            <Text style={styles.buttonText}>Video Call</Text>
           </TouchableOpacity>
 
         </View>
@@ -69,6 +81,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '80%',
+    height: '15%',
     marginTop: 15,
     borderRadius: 8,
     paddingVertical: 10,
@@ -77,7 +90,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#555555',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-
   },
   buttonText: {
     color: '#fff',
@@ -91,6 +103,15 @@ const styles = StyleSheet.create({
     height: '25%',
     width: '80%',
     backgroundColor: "#78b0ff",
+  },
+  video:{
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: "10%",
+    height: '15%',
+    width: '80%',
+    backgroundColor: '#555555',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },

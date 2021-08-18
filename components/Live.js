@@ -12,6 +12,7 @@ import {
     Dimensions,
     Share,
     TouchableOpacity,
+    AsyncStorage
 } from 'react-native';
 
 import RtcEngine, {
@@ -79,7 +80,9 @@ export function Live(props) {
         AgoraEngine.current = await RtcEngine.create(
             'ad07b133744c43049fa339692513e594',
         );
+        
         AgoraEngine.current.enableVideo();
+
         AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting);
         if (isBroadcaster)
 
@@ -161,7 +164,7 @@ export function Live(props) {
             ) : (
                 <>
                     {isBroadcaster ? renderLocal() : renderHost()}
-                    
+
                     <View style={styles.buttonContainer}>
 
                         {isBroadcaster ?
