@@ -27,6 +27,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import requestCameraAndAudioPermission from './Permission';
 
+
 const dimensions = {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
@@ -80,7 +81,7 @@ export function Live(props) {
         AgoraEngine.current = await RtcEngine.create(
             'ad07b133744c43049fa339692513e594',
         );
-        
+
         AgoraEngine.current.enableVideo();
 
         AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting);
@@ -99,12 +100,14 @@ export function Live(props) {
                 setJoined(true);
             },
         );
+
+
     };
 
     const onSwitchCamera = () => AgoraEngine.current.switchCamera();
 
     const onEndStream = () => {
-        AgoraEngine.current.leaveChannel()
+        AgoraEngine.current.leaveChannel(console.log("end"))
         navigation.navigate('Home')
     }
     const onLeave = () => {

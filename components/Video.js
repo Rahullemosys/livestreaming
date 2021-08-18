@@ -22,8 +22,9 @@ import RtcEngine, {
 } from 'react-native-agora';
 
 import { useNavigation } from '@react-navigation/native';
-
+import styles from './Style';
 import requestCameraAndAudioPermission from './Permission';
+
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -51,6 +52,10 @@ export const Video = (props) => {
 
     const [channelName, setChannelName] = useState('videochat')
 
+    const [camera, setCamera] = useState("Back camera")
+
+    const token = '006a10f9ec87bf6425795fa4c302eb5dc35IAA356G5gjBxhh/LnlzJXIbS660CrazbVrb8Trb+IrvE251fCyoAAAAAEAC1iXookUseYQEAAQCQSx5h/BoeYQEAAQD7Gh5h';
+
     const navigation = useNavigation();
 
     const AgoraEngine = useRef();
@@ -60,13 +65,15 @@ export const Video = (props) => {
 
         init();
 
-    }, [])
+        startCall();
+
+    }, [52])
 
 
     const init = async () => {
 
         AgoraEngine.current = await RtcEngine.create(
-            'ad07b133744c43049fa339692513e594',
+            'a10f9ec87bf6425795fa4c302eb5dc35',
         );
         AgoraEngine.current.enableVideo();
 
@@ -80,16 +87,49 @@ export const Video = (props) => {
 
         AgoraEngine.current.addListener('UserJoined', (uid, elapsed) => {
             console.log('UserJoined', uid, elapsed);
+
+            if (peerIds.indexOf(uid) === -1) {
+                setPeerIds([...peerIds, uid],);
+                console.log(peerIds)
+            }
         });
 
         AgoraEngine.current.addListener('UserOffline', (uid, reason) => {
             console.log('UserOffline', uid, reason);
+            setPeerIds(
+                peerIds.filter((id) => id !== uid),
+            )
         });
 
         AgoraEngine.current.addListener('JoinChannelSuccess', (channel, uid, elapsed) => {
             console.log('JoinChannelSuccess', channel, uid, elapsed);
+            setJoinSucceed(true)
         });
     }
+
+
+    const startCall = async () => {
+        // Join Channel using null token and channel name
+        await AgoraEngine.current?.joinChannel(
+            token,
+            channelName,
+            null,
+            0
+        );
+    };
+
+    const endCall = async () => {
+        await AgoraEngine.current?.leaveChannel(
+            console.log("call End")
+        );
+        setPeerIds([])
+        setJoinSucceed(false)
+        navigation.navigate('Home')
+    };
+
+    const onSwitchCamera = () => { AgoraEngine.current.switchCamera(camera === "Back camera" ? setCamera("Front camera") : setCamera("Back camera")) }
+
+
 
     const renderVideos = () => {
 
@@ -113,7 +153,7 @@ export const Video = (props) => {
                 contentContainerStyle={{ paddingHorizontal: 2.5 }}
                 horizontal={true}
             >
-                {peerIds.map((value) => {
+                {peerIds.map((value,) => {
                     return (
                         <RtcRemoteView.SurfaceView
                             style={styles.remote}
@@ -128,9 +168,20 @@ export const Video = (props) => {
         );
     };
 
-
-
     return (
-        <Text>Video call</Text>
+        <View style={styles.max}>
+            <View style={styles.max}>
+                {renderVideos()}
+                <View style={styles.buttonHolder}>
+                    <TouchableOpacity onPress={endCall} style={styles.button}>
+                        <Text style={styles.buttonText}> End Call </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={onSwitchCamera} style={styles.button}>
+                        <Text style={styles.buttonText}> {camera} </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </View>
     )
 }
