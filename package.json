@@ -19,6 +19,7 @@
     "react-native-get-random-values": "^1.7.0",
     "react-native-safe-area-context": "^3.3.0",
     "react-native-screens": "^3.5.0",
+    "use-state-if-mounted": "^1.0.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

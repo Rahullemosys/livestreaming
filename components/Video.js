@@ -50,30 +50,35 @@ export const Video = (props) => {
 
     const [peerIds, setPeerIds] = useState([])
 
-    const [channelName, setChannelName] = useState('videochat')
+    const [channelName, setChannelName] = useState('livestream')
 
     const [camera, setCamera] = useState("Back camera")
 
-    const token = '006a10f9ec87bf6425795fa4c302eb5dc35IAA356G5gjBxhh/LnlzJXIbS660CrazbVrb8Trb+IrvE251fCyoAAAAAEAC1iXookUseYQEAAQCQSx5h/BoeYQEAAQD7Gh5h';
+    const token = '0069d0fe06a31134cddb367f594fea6ff8dIABFQVBkGE7307qYz0sgmFBW2zbJYeg61gvqJPS5pRdw1Z1fCyoAAAAAEAC1iXoo60UfYQEAAQDrRR9h';
 
     const navigation = useNavigation();
 
     const AgoraEngine = useRef();
 
     useEffect(() => {
+
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
 
-        init();
+        startCall()
 
-        startCall();
+        init()
 
-    }, [52])
+        console.log('i fire once');
+
+    }, [init])
 
 
     const init = async () => {
 
+
+
         AgoraEngine.current = await RtcEngine.create(
-            'a10f9ec87bf6425795fa4c302eb5dc35',
+            '9d0fe06a31134cddb367f594fea6ff8d',
         );
         AgoraEngine.current.enableVideo();
 
@@ -109,7 +114,6 @@ export const Video = (props) => {
 
 
     const startCall = async () => {
-        // Join Channel using null token and channel name
         await AgoraEngine.current?.joinChannel(
             token,
             channelName,
@@ -129,8 +133,6 @@ export const Video = (props) => {
 
     const onSwitchCamera = () => { AgoraEngine.current.switchCamera(camera === "Back camera" ? setCamera("Front camera") : setCamera("Back camera")) }
 
-
-
     const renderVideos = () => {
 
         return joinSucceed ? (
@@ -143,6 +145,7 @@ export const Video = (props) => {
                 {renderRemoteVideos()}
             </View>
         ) : null;
+        
     };
 
     const renderRemoteVideos = () => {
@@ -153,9 +156,10 @@ export const Video = (props) => {
                 contentContainerStyle={{ paddingHorizontal: 2.5 }}
                 horizontal={true}
             >
-                {peerIds.map((value,) => {
+                {peerIds.map((value, index) => {
                     return (
                         <RtcRemoteView.SurfaceView
+                            key={index}
                             style={styles.remote}
                             uid={value}
                             channelId={channelName}

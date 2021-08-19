@@ -22,9 +22,9 @@ import RtcEngine, {
     VideoRemoteState,
 } from 'react-native-agora';
 
-import requestCameraAndAudioPermission from './Permission';
-
 import { useNavigation } from '@react-navigation/native';
+
+import requestCameraAndAudioPermission from './Permission';
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -44,36 +44,56 @@ const videoStateMessage = (state) => {
     }
 };
 
-// const channel = e083c396-0c32-4076-8732-3d023f800da6;
-
-export const Join = (props) => {
+export function Join(props) {
 
     const navigation = useNavigation();
 
+    const isBroadcaster = props.route.params.type === 'creat';
+
+    const You = true
+
+    const onShare = async () => {
+        try {
+            const result = await Share.share({ message: props.route.params.channel });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                    console.log(result.activityType)
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
     const [joined, setJoined] = useState(false);
-
-    const isBroadcaster = props.route.params.type === 'create';
-
-    const AgoraEngine = useRef();
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
     );
 
+    const AgoraEngine = useRef();
+
     const init = async () => {
 
         AgoraEngine.current = await RtcEngine.create(
-            'ad07b133744c43049fa339692513e594',
+            '640eb5dc1cd24cb8ab8443820ef7386e',
         );
-        
+
         AgoraEngine.current.enableVideo();
 
         AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting);
+        if (isBroadcaster)
 
-        AgoraEngine.current.setClientRole(ChannelProfile.LiveBroadcasting);
+            AgoraEngine.current.setClientRole(ClientRole.Broadcaster);
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
-            if (uid === 0) setBroadcasterVideoState(state);
+            if (uid === 1) setBroadcasterVideoState(state);
+            console.log(uid, state)
         });
 
         AgoraEngine.current.addListener(
@@ -83,9 +103,31 @@ export const Join = (props) => {
                 setJoined(true);
             },
         );
+
+        AgoraEngine.current.addListener('Warning', (warn) => {
+            console.log('Warning', warn);
+        });
+
+        AgoraEngine.current.addListener('Error', (err) => {
+            console.log('Error', err);
+        });
+
     };
 
+    const onSwitchCamera = () => AgoraEngine.current.switchCamera();
+
+    const onEndStream = () => {
+        AgoraEngine.current.leaveChannel()
+        navigation.navigate('Home')
+    }
+
+    const onLeave = () => {
+        AgoraEngine.current.destroy()
+        navigation.navigate('Home')
+    }
+
     useEffect(() => {
+
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
 
         const uid = isBroadcaster ? 1 : 0;
@@ -98,6 +140,7 @@ export const Join = (props) => {
                 uid,
             ),
         );
+
         return () => {
             AgoraEngine.current.destroy();
         };
@@ -107,7 +150,7 @@ export const Join = (props) => {
         broadcasterVideoState === VideoRemoteState.Decoding ? (
             <RtcRemoteView.SurfaceView
                 uid={1}
-                style={styles.fullscreen}
+                style={isBroadcaster ? styles.fullscreen : styles.fullscreens}
                 channelId={props.route.params.channel}
             />
         ) : (
@@ -119,33 +162,38 @@ export const Join = (props) => {
         );
 
     const renderLocal = () => (
-        <RtcLocalView.SurfaceView
-            style={styles.fullscreen}
-            channelId={props.route.params.channel}
-        />
+        <>
+            <RtcLocalView.SurfaceView
+                style={styles.fullscreen}
+                channelId={props.route.params.channel}
+            />
+        </>
     );
 
-    const onLeave = () => {
-        navigation.navigate('Home')
-    }
-
     return (
-        <View style={styles.container}>
-
-            {!joined ? <>
-                <ActivityIndicator
-                    size={60}
-                    color="#222"
-                    style={styles.activityIndicator}
-                />
-                <Text style={styles.loadingText}>Joining Stream, Please Wait</Text>
-            </> :
+        <View style={isBroadcaster ? styles.container : styles.containers}>
+            {!joined ? (
                 <>
-                    {isBroadcaster ? renderHost() : renderLocal()}
+                    <ActivityIndicator
+                        size={60}
+                        color="#222"
+                        style={styles.activityIndicator}
+                    />
+                    <Text style={styles.loadingText}>Joining Stream, Please Wait</Text>
+                </>
+            ) : (
+                <>
+
+                    {isBroadcaster ? renderLocal() : renderHost()}
+
+                    
+
                     <View style={styles.buttonContainer}>
 
                         {isBroadcaster ?
                             <>
+                                <Text style={styles.top}>55</Text>
+
                                 <TouchableOpacity style={styles.button} onPress={onSwitchCamera}>
                                     <Text style={styles.buttonText}>Flip</Text>
                                 </TouchableOpacity>
@@ -157,22 +205,25 @@ export const Join = (props) => {
                                 <TouchableOpacity style={styles.button} onPress={onShare}>
                                     <Text style={styles.buttonText}>Share</Text>
                                 </TouchableOpacity>
+
                             </>
                             :
                             <>
                                 <TouchableOpacity style={styles.button} onPress={onLeave}>
                                     <Text style={styles.buttonText}>Leave</Text>
                                 </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.button} onPress={onShare}>
+                                    <Text style={styles.buttonText}>Share</Text>
+                                </TouchableOpacity>
                             </>
                         }
                     </View>
                 </>
-            }
-
+            )}
         </View>
-    )
+    );
 }
-
 
 const styles = StyleSheet.create({
     container: {
@@ -180,13 +231,20 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    containers: {
+         flex: 1,
+    },
     loadingText: {
         fontSize: 18,
         color: '#222',
     },
     fullscreen: {
-        width: dimensions.width,
-        height: dimensions.height,
+        width: "100%",
+        height: "100%",
+    },
+    fullscreens: {
+        width: "100%",
+        height: "60%",
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -194,7 +252,7 @@ const styles = StyleSheet.create({
         bottom: 0,
     },
     button: {
-        width: 150,
+        width: 100,
         backgroundColor: '#fff',
         marginBottom: 50,
         paddingVertical: 13,
@@ -219,4 +277,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
     },
+    top: {
+        fontSize: 50,
+        position: 'absolute',
+        top: '-100%',
+        left: 30
+    }
 });

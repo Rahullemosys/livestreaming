@@ -12,7 +12,6 @@ import {
     Dimensions,
     Share,
     TouchableOpacity,
-    AsyncStorage
 } from 'react-native';
 
 import RtcEngine, {
@@ -26,7 +25,6 @@ import RtcEngine, {
 import { useNavigation } from '@react-navigation/native';
 
 import requestCameraAndAudioPermission from './Permission';
-
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -72,14 +70,17 @@ export function Live(props) {
 
     const [joined, setJoined] = useState(false);
 
+
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
     );
+
     const AgoraEngine = useRef();
 
     const init = async () => {
+
         AgoraEngine.current = await RtcEngine.create(
-            'ad07b133744c43049fa339692513e594',
+            '640eb5dc1cd24cb8ab8443820ef7386e',
         );
 
         AgoraEngine.current.enableVideo();
@@ -91,6 +92,7 @@ export function Live(props) {
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
             if (uid === 1) setBroadcasterVideoState(state);
+            console.log(uid, state)
         });
 
         AgoraEngine.current.addListener(
@@ -101,15 +103,23 @@ export function Live(props) {
             },
         );
 
+        AgoraEngine.current.addListener('Warning', (warn) => {
+            console.log('Warning', warn);
+        });
+
+        AgoraEngine.current.addListener('Error', (err) => {
+            console.log('Error', err);
+        });
 
     };
 
     const onSwitchCamera = () => AgoraEngine.current.switchCamera();
 
     const onEndStream = () => {
-        AgoraEngine.current.leaveChannel(console.log("end"))
+        AgoraEngine.current.leaveChannel()
         navigation.navigate('Home')
     }
+
     const onLeave = () => {
         AgoraEngine.current.destroy()
         navigation.navigate('Home')
@@ -147,10 +157,12 @@ export function Live(props) {
         );
 
     const renderLocal = () => (
-        <RtcLocalView.SurfaceView
-            style={styles.fullscreen}
-            channelId={props.route.params.channel}
-        />
+        <>
+            <RtcLocalView.SurfaceView
+                style={styles.fullscreen}
+                channelId={props.route.params.channel}
+            />
+        </>
     );
 
     return (
@@ -166,12 +178,15 @@ export function Live(props) {
                 </>
             ) : (
                 <>
+
                     {isBroadcaster ? renderLocal() : renderHost()}
 
                     <View style={styles.buttonContainer}>
 
                         {isBroadcaster ?
                             <>
+                                <Text style={styles.top}>55</Text>
+
                                 <TouchableOpacity style={styles.button} onPress={onSwitchCamera}>
                                     <Text style={styles.buttonText}>Flip</Text>
                                 </TouchableOpacity>
@@ -183,6 +198,7 @@ export function Live(props) {
                                 <TouchableOpacity style={styles.button} onPress={onShare}>
                                     <Text style={styles.buttonText}>Share</Text>
                                 </TouchableOpacity>
+
                             </>
                             :
                             <>
@@ -243,4 +259,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
     },
+    top: {
+        fontSize: 50,
+        position: 'absolute',
+        top: '-100%',
+        left: 30
+    }
 });
