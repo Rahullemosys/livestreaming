@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Home,Live,Join,AddStream,WatchStream,Video } from "./components";
+import { Home,Live,Join,AddStream,WatchStream,Video,Videojoin } from "./components";
 
 const Stack = createStackNavigator();
 
@@ -18,6 +18,7 @@ export default function App() {
         <Stack.Screen name="AddStream" component={AddStream} options={options} />
         <Stack.Screen name="WatchStream" component={WatchStream} options={options} />
         <Stack.Screen name="Video" component={Video} options={options} />
+        <Stack.Screen name="Videojoin" component={Videojoin} options={options} />
       </Stack.Navigator>
     </NavigationContainer>
   );

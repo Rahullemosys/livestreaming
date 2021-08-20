@@ -150,7 +150,7 @@ export function Join(props) {
         broadcasterVideoState === VideoRemoteState.Decoding ? (
             <RtcRemoteView.SurfaceView
                 uid={1}
-                style={isBroadcaster ? styles.fullscreen : styles.fullscreens}
+                style={styles.fullscreen }
                 channelId={props.route.params.channel}
             />
         ) : (
@@ -171,7 +171,7 @@ export function Join(props) {
     );
 
     return (
-        <View style={isBroadcaster ? styles.container : styles.containers}>
+        <View style={styles.container}>
             {!joined ? (
                 <>
                     <ActivityIndicator
@@ -185,8 +185,6 @@ export function Join(props) {
                 <>
 
                     {isBroadcaster ? renderLocal() : renderHost()}
-
-                    
 
                     <View style={styles.buttonContainer}>
 
@@ -232,7 +230,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     containers: {
-         flex: 1,
+        flex: 1,
     },
     loadingText: {
         fontSize: 18,
@@ -241,10 +239,6 @@ const styles = StyleSheet.create({
     fullscreen: {
         width: "100%",
         height: "100%",
-    },
-    fullscreens: {
-        width: "100%",
-        height: "60%",
     },
     buttonContainer: {
         flexDirection: 'row',
