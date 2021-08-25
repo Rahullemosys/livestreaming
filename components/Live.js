@@ -8,11 +8,8 @@ import {
     StyleSheet,
     Text,
     View,
-    ActivityIndicator,
     Dimensions,
     Share,
-    TouchableOpacity,
-    TextInput,
 } from 'react-native';
 
 import RtcEngine, {
@@ -25,7 +22,7 @@ import RtcEngine, {
 
 import { useNavigation } from '@react-navigation/native';
 
-import { CommentSection,ButtonContainer } from "./RenderElements";
+import { CommentSection, ButtonContainer, ActivityIndicate } from "./RenderElements";
 
 import requestCameraAndAudioPermission from './Permission';
 
@@ -73,6 +70,12 @@ export function Live(props) {
 
     const [joined, setJoined] = useState(false);
 
+    const [noCamera, setNoCamera] = useState("off");
+
+    const [mute, setMute] = useState(true);
+
+    const [Color, setColor] = useState("black")
+
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
     );
@@ -115,9 +118,30 @@ export function Live(props) {
 
     };
 
-    const onSwitchCamera = () => AgoraEngine.current.switchCamera();
+    const onSwitchCamera = () => {
+        console.log("Camera Switched")
+        AgoraEngine.current.switchCamera(
+            Color === "black" ? setColor("white")
+                :
+                setColor("black"));
+    }
+
+    const onMute = () => {
+        console.log("Audio Mute Function called")
+        mute === true ? AgoraEngine.current.disableAudio(setMute(false))
+            :
+            AgoraEngine.current.enableAudio(setMute(true))
+    }
+
+    const onCamera = () => {
+        console.log("camera Enable Disable Function called")
+        noCamera === "off" ? AgoraEngine.current.disableVideo(setNoCamera("turn on"),alert("Camera is Disable Now"))
+            :
+            AgoraEngine.current.enableVideo(setNoCamera("off"))
+    }
 
     const onEndStream = () => {
+        console.log("Stream End")
         AgoraEngine.current.leaveChannel()
         navigation.navigate('Home')
     }
@@ -171,27 +195,23 @@ export function Live(props) {
     return (
         <View style={styles.container}>
             {!joined ? (
-                <>
-                    <ActivityIndicator
-                        size={60}
-                        color="#222"
-                        style={styles.activityIndicator}
-                    />
-                    <Text style={styles.loadingText}>Joining Stream, Please Wait</Text>
-                </>
+                <ActivityIndicate />
             ) : (
                 <>
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
-                    <CommentSection/>
+                    <CommentSection />
 
-                    <ButtonContainer 
-                    isBroadcaster={isBroadcaster} 
-                    onSwitchCamera={onSwitchCamera}
-                    onEndStream={onEndStream}
-                    onShare={onShare}
-                    onLeave={onLeave}
+                    <ButtonContainer
+                        isBroadcaster={isBroadcaster}
+                        onSwitchCamera={onSwitchCamera}
+                        onEndStream={onEndStream}
+                        onShare={onShare}
+                        onLeave={onLeave}
+                        onCamera={onCamera}
+                        onMute={onMute}
+                        Color={Color}
                     />
 
                 </>

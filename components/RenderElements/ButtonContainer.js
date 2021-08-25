@@ -20,31 +20,36 @@ const dimensions = {
 
 export function ButtonContainer(props) {
 
-    const solids = props.solid
-
-
     return (
         <View style={styles.buttonContainer}>
 
-            { props.isBroadcaster ?
+            {props.isBroadcaster ?
                 <>
-                    <TouchableOpacity  style={styles.button} onPress={props.onSwitchCamera}>
-                    <FontAwesome5 name={'camera'} solid size={30}/>
+                    <TouchableOpacity style={styles.button} onPress={props.onSwitchCamera}>
+                        <FontAwesome5 name={'camera'} Solid size={30} color={props.Color}/>
                     </TouchableOpacity>
 
-                    <TouchableOpacity  style={styles.button} onPress={props.onEndStream}>
-                    <FontAwesome5 name={'sign-out-alt'} solid size={30}/>
+                    <TouchableOpacity style={styles.button} onPress={props.onMute}>
+                        <FontAwesome5 name={'microphone-alt-slash'} solid size={30} color={props.Color} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity   style={styles.button} onPress={props.onShare}>
-                        <FontAwesome5 name={'share-alt-square'} solid size={30} />
+                    <TouchableOpacity style={styles.button} onPress={props.onCamera}>
+                        <FontAwesome5 name={'video'} solid size={30} color={props.Color} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.button} onPress={props.onEndStream}>
+                        <FontAwesome5 name={'sign-out-alt'} solid size={30} color={props.Color} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.button} onPress={props.onShare}>
+                        <FontAwesome5 name={'share-alt-square'} solid size={30} color={props.Color} />
                     </TouchableOpacity>
 
                 </>
                 :
                 <>
                     <TouchableOpacity style={styles.button} onPress={props.onLeave}>
-                    <FontAwesome5 name={'sign-out-alt'} solid size={30}/>
+                        <FontAwesome5 name={'sign-out-alt'} solid size={30} />
                     </TouchableOpacity>
                 </>
             }
@@ -59,7 +64,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         position: 'absolute',
         top: 10,
-        right:20
+        right: 20
     },
     button: {
         width: 50,
