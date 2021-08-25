@@ -19,6 +19,7 @@ import RtcEngine, {
     RtcLocalView,
     RtcRemoteView,
     VideoRenderMode,
+    VideoRemoteState
 } from 'react-native-agora';
 
 import { useNavigation } from '@react-navigation/native';
@@ -50,11 +51,15 @@ export const Video = (props) => {
 
     const [peerIds, setPeerIds] = useState([])
 
-    const [channelName, setChannelName] = useState('livestream')
+    const channelName = "videocall";
 
     const [camera, setCamera] = useState("Back camera")
 
-    const token = '0069d0fe06a31134cddb367f594fea6ff8dIABFQVBkGE7307qYz0sgmFBW2zbJYeg61gvqJPS5pRdw1Z1fCyoAAAAAEAC1iXoo60UfYQEAAQDrRR9h';
+    const token = '0069d0fe06a31134cddb367f594fea6ff8dIAA0AY2470alsLEqG2CCaShutgTan6vRYvnz7s5MJ1eLW8DzfHsAAAAAEAALrnX4XIonYQEAAQBciidh';
+
+    const [broadcasterVideoState, setBroadcasterVideoState] = useState(
+        VideoRemoteState.Decoding,
+    );
 
     const navigation = useNavigation();
 
@@ -70,12 +75,9 @@ export const Video = (props) => {
 
         console.log('i fire once');
 
-    }, [init])
-
+    }, [10])
 
     const init = async () => {
-
-
 
         AgoraEngine.current = await RtcEngine.create(
             '9d0fe06a31134cddb367f594fea6ff8d',
@@ -88,6 +90,11 @@ export const Video = (props) => {
 
         AgoraEngine.current.addListener('Error', (err) => {
             console.log('Error', err);
+        });
+
+        AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
+            if (uid === 1) setBroadcasterVideoState(state);
+            console.log(uid, state)
         });
 
         AgoraEngine.current.addListener('UserJoined', (uid, elapsed) => {
@@ -112,7 +119,6 @@ export const Video = (props) => {
         });
     }
 
-
     const startCall = async () => {
         await AgoraEngine.current?.joinChannel(
             token,
@@ -131,7 +137,11 @@ export const Video = (props) => {
         navigation.navigate('Home')
     };
 
-    const onSwitchCamera = () => { AgoraEngine.current.switchCamera(camera === "Back camera" ? setCamera("Front camera") : setCamera("Back camera")) }
+    const onSwitchCamera = () => {
+        AgoraEngine.current.switchCamera(
+            camera === "Back camera" ? setCamera("Front camera") : setCamera("Back camera")
+        )
+    }
 
     const renderVideos = () => {
 
@@ -145,7 +155,7 @@ export const Video = (props) => {
                 {renderRemoteVideos()}
             </View>
         ) : null;
-        
+
     };
 
     const renderRemoteVideos = () => {
@@ -154,8 +164,8 @@ export const Video = (props) => {
             <ScrollView
                 style={styles.remoteContainer}
                 contentContainerStyle={{ paddingHorizontal: 2.5 }}
-                horizontal={true}
-            >
+                horizontal={true} >
+
                 {peerIds.map((value, index) => {
                     return (
                         <RtcRemoteView.SurfaceView
@@ -175,7 +185,12 @@ export const Video = (props) => {
     return (
         <View style={styles.max}>
             <View style={styles.max}>
-                {renderVideos()}
+                {broadcasterVideoState === VideoRemoteState.Decoding ? renderVideos() :
+                    <View style={styles.broadcasterVideoStateMessage}>
+                        <Text style={styles.broadcasterVideoStateMessageText}>
+                            {videoStateMessage(broadcasterVideoState)}
+                        </Text>
+                    </View>}
                 <View style={styles.buttonHolder}>
                     <TouchableOpacity onPress={endCall} style={styles.button}>
                         <Text style={styles.buttonText}> End Call </Text>

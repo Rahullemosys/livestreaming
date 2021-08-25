@@ -8,11 +8,8 @@ import {
     StyleSheet,
     Text,
     View,
-    ActivityIndicator,
     Dimensions,
     Share,
-    TouchableOpacity,
-    TextInput
 } from 'react-native';
 
 import RtcEngine, {
@@ -24,6 +21,8 @@ import RtcEngine, {
 } from 'react-native-agora';
 
 import { useNavigation } from '@react-navigation/native';
+
+import { CommentSection, ButtonContainer, ActivityIndicate } from "../RenderElements";
 
 import requestCameraAndAudioPermission from './Permission';
 
@@ -44,6 +43,9 @@ const videoStateMessage = (state) => {
 
         case VideoRemoteState.Failed:
             return 'Network Error';
+        
+        // case VideoRemoteState.Starting:
+        //     return alert("Camera")
     }
 };
 
@@ -73,9 +75,13 @@ export function Live(props) {
 
     const [joined, setJoined] = useState(false);
 
-    const [camera, setCamera] = useState("Back");
+    const [noCamera, setNoCamera] = useState("off");
 
-    const [count, setCount] = useState('')
+    const [mute, setMute] = useState(true);
+
+    const [Color, setColor] = useState("black")
+
+    const [name,setName]= useState("Host")
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
@@ -98,7 +104,7 @@ export function Live(props) {
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
             if (uid === 1) setBroadcasterVideoState(state);
-            console.log(uid, state)
+            console.log(uid, state ,"rahul")
         });
 
         AgoraEngine.current.addListener(
@@ -106,6 +112,7 @@ export function Live(props) {
             (channel, uid, elapsed) => {
                 console.log('JoinChannelSuccess', channel, uid, elapsed);
                 setJoined(true);
+                setName(props.route.params.username)
             },
         );
 
@@ -119,9 +126,30 @@ export function Live(props) {
 
     };
 
-    const onSwitchCamera = () => AgoraEngine.current.switchCamera(camera === "Back" ? setCamera("Front") : setCamera("Back"));
+    const onSwitchCamera = () => {
+        console.log("Camera Switched")
+        AgoraEngine.current.switchCamera(
+            Color === "black" ? setColor("white")
+                :
+                setColor("black"));
+    }
+
+    const onMute = () => {
+        console.log("Audio Mute Function called")
+        mute === true ? AgoraEngine.current.disableAudio(setMute(false))
+            :
+            AgoraEngine.current.enableAudio(setMute(true))
+    }
+
+    const onCamera = () => {
+        console.log("camera Enable Disable Function called")
+        noCamera === "off" ? AgoraEngine.current.disableVideo(setNoCamera("turn on"),alert("Camera is Disable Now"))
+            :
+            AgoraEngine.current.enableVideo(setNoCamera("off"))
+    }
 
     const onEndStream = () => {
+        console.log("Stream End")
         AgoraEngine.current.leaveChannel()
         navigation.navigate('Home')
     }
@@ -147,21 +175,7 @@ export function Live(props) {
             ),
         );
 
-        const fetchapi = await fetch(api , {
-            headers: {
-                'Authorization': `Basic ZWU3NDM1NTk2Yjg4NDI2YTgzZDliNmViY2MyNDgyZDg6MzEwZjYwNTE1NGZmNDg1MWI2OTY2NWY2YTcyYTM4Y2U=`,
-            }
-        })
-
-        const response = await fetchapi.json();
-        
-        const user_count = response.data.channels[0].user_count ;
-        
-        console.log(user_count,"rahul");
-
-        setCount(user_count)
-
-        console.log(count)
+        // console.log(props.route.params.username)
 
         return () => {
             AgoraEngine.current.destroy();
@@ -195,63 +209,24 @@ export function Live(props) {
     return (
         <View style={styles.container}>
             {!joined ? (
-                <>
-                    <ActivityIndicator
-                        size={60}
-                        color="#222"
-                        style={styles.activityIndicator}
-                    />
-                    <Text style={styles.loadingText}>Joining Stream, Please Wait</Text>
-                </>
+                <ActivityIndicate />
             ) : (
                 <>
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
-                    <Text style={{ position: 'absolute', top: 60, left: 20, fontSize: 50 }}>{count}</Text>
+                    <CommentSection name={name}/>
 
-                    <View style={{ position: 'absolute', bottom: 10, width: dimensions.width }}>
-
-
-                        <Text style={{ fontSize: 25, marginLeft: 10 }}>Rahul</Text>
-
-                        <View style={{ display: 'flex', flexDirection: 'row' }}>
-
-                            <TextInput placeholder="Comment" style={{ width: '80%', textAlign: 'center', fontSize: 24, fontWeight: 'bold' }} />
-
-                            <TouchableOpacity style={{ backgroundColor: '#fff', width: '20%', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={styles.buttonText}>send</Text>
-                            </TouchableOpacity>
-
-                        </View>
-                    </View>
-
-                    <View style={styles.buttonContainer}>
-
-                        {isBroadcaster ?
-                            <>
-                                <Text style={styles.top}>55</Text>
-
-                                <TouchableOpacity style={styles.button} onPress={onSwitchCamera}>
-                                    <Text style={styles.buttonText}> {camera} </Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.button} onPress={onEndStream}>
-                                    <Text style={styles.buttonText}>End stream</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.button} onPress={onShare}>
-                                    <Text style={styles.buttonText}>Share</Text>
-                                </TouchableOpacity>
-                            </>
-                            :
-                            <>
-                                <TouchableOpacity style={styles.button} onPress={onLeave}>
-                                    <Text style={styles.buttonText}>Leave</Text>
-                                </TouchableOpacity>
-                            </>
-                        }
-                    </View>
+                    <ButtonContainer
+                        isBroadcaster={isBroadcaster}
+                        onSwitchCamera={onSwitchCamera}
+                        onEndStream={onEndStream}
+                        onShare={onShare}
+                        onLeave={onLeave}
+                        onCamera={onCamera}
+                        onMute={onMute}
+                        Color={Color}
+                    />
 
                 </>
             )}
@@ -304,10 +279,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
     },
-    top: {
-        fontSize: 50,
-        position: 'absolute',
-        top: '-100%',
-        left: 30
-    }
+
 });

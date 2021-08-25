@@ -14,13 +14,21 @@ export function WatchStream() {
 
   const [joinChannel, setJoinChannel] = useState('');
 
+  const [username, setUsername] = useState('');
+
   const joinLive = () =>
-    navigation.navigate('Live', { type: 'join', channel: joinChannel });
+    navigation.navigate('Live', { type: 'join', channel: joinChannel, username:username});
 
   return (
     <View style={styles.container}>
       <View style={styles.joinContainer}>
         <Text style={styles.title}>Join Live Stream</Text>
+        <TextInput
+          value={username}
+          onChangeText={setUsername}
+          placeholder="User Name"
+          style={styles.joinChannelInput}
+        />
         <TextInput
           value={joinChannel}
           onChangeText={setJoinChannel}
@@ -29,7 +37,7 @@ export function WatchStream() {
         />
         <TouchableOpacity
           onPress={joinLive}
-          disabled={joinChannel === ''}
+          disabled={joinChannel === '',username === ''}
           style={[
             styles.button,
             { backgroundColor: joinChannel === '' ? '#555555' : '#78b0ff' },
