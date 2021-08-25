@@ -45,4 +45,18 @@ export default StyleSheet.create({
     paddingVertical: 5,
     color: '#0093E9',
   },
+  broadcasterVideoStateMessage: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#222',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  broadcasterVideoStateMessageText: {
+    color: '#fff',
+    fontSize: 20,
+  },
 });

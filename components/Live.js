@@ -12,6 +12,7 @@ import {
     Dimensions,
     Share,
     TouchableOpacity,
+    TextInput,
 } from 'react-native';
 
 import RtcEngine, {
@@ -23,6 +24,8 @@ import RtcEngine, {
 } from 'react-native-agora';
 
 import { useNavigation } from '@react-navigation/native';
+
+import { CommentSection,ButtonContainer } from "./RenderElements";
 
 import requestCameraAndAudioPermission from './Permission';
 
@@ -69,7 +72,6 @@ export function Live(props) {
     };
 
     const [joined, setJoined] = useState(false);
-
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
@@ -136,6 +138,7 @@ export function Live(props) {
                 uid,
             ),
         );
+
         return () => {
             AgoraEngine.current.destroy();
         };
@@ -181,33 +184,16 @@ export function Live(props) {
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
-                    <View style={styles.buttonContainer}>
+                    <CommentSection/>
 
-                        {isBroadcaster ?
-                            <>
-                                <Text style={styles.top}>55</Text>
+                    <ButtonContainer 
+                    isBroadcaster={isBroadcaster} 
+                    onSwitchCamera={onSwitchCamera}
+                    onEndStream={onEndStream}
+                    onShare={onShare}
+                    onLeave={onLeave}
+                    />
 
-                                <TouchableOpacity style={styles.button} onPress={onSwitchCamera}>
-                                    <Text style={styles.buttonText}>Flip</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.button} onPress={onEndStream}>
-                                    <Text style={styles.buttonText}>End stream</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.button} onPress={onShare}>
-                                    <Text style={styles.buttonText}>Share</Text>
-                                </TouchableOpacity>
-
-                            </>
-                            :
-                            <>
-                                <TouchableOpacity style={styles.button} onPress={onLeave}>
-                                    <Text style={styles.buttonText}>Leave</Text>
-                                </TouchableOpacity>
-                            </>
-                        }
-                    </View>
                 </>
             )}
         </View>
@@ -231,7 +217,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         position: 'absolute',
-        bottom: 0,
+        top: 10,
     },
     button: {
         width: 100,
@@ -259,10 +245,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
     },
-    top: {
-        fontSize: 50,
-        position: 'absolute',
-        top: '-100%',
-        left: 30
-    }
+
 });
