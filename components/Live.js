@@ -153,7 +153,9 @@ export function Live(props) {
 
     useEffect(() => {
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
+
         const uid = isBroadcaster ? 1 : 0;
+
         init().then(() =>
             AgoraEngine.current.joinChannel(
                 null,
@@ -162,6 +164,8 @@ export function Live(props) {
                 uid,
             ),
         );
+
+        // console.log(props.route.params.username)
 
         return () => {
             AgoraEngine.current.destroy();

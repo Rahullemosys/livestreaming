@@ -51,11 +51,11 @@ export const Video = (props) => {
 
     const [peerIds, setPeerIds] = useState([])
 
-    const channelName = "live";
+    const channelName = "videocall";
 
     const [camera, setCamera] = useState("Back camera")
 
-    const token = '0069d0fe06a31134cddb367f594fea6ff8dIAAuDO4HeEU1vJcS3gUNGHNx9H9T0CG15gqukAA+kglThK8sD1MAAAAAEAB1cLwPcMkgYQEAAQBwySBh';
+    const token = '0069d0fe06a31134cddb367f594fea6ff8dIAA0AY2470alsLEqG2CCaShutgTan6vRYvnz7s5MJ1eLW8DzfHsAAAAAEAALrnX4XIonYQEAAQBciidh';
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
@@ -75,7 +75,7 @@ export const Video = (props) => {
 
         console.log('i fire once');
 
-    }, [init])
+    }, [10])
 
     const init = async () => {
 

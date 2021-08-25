@@ -36,7 +36,7 @@ const onVideo = () => {
       <View style={styles.createContainer}>
 
         <TouchableOpacity style={styles.button} onPress={createLive}>
-          <Text style={styles.buttonText}>Start</Text>
+          <Text style={styles.buttonText}>Start Stream</Text>
         </TouchableOpacity>
 
         <View style={styles.stream}>
