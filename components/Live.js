@@ -41,6 +41,9 @@ const videoStateMessage = (state) => {
 
         case VideoRemoteState.Failed:
             return 'Network Error';
+        
+        // case VideoRemoteState.Starting:
+        //     return alert("Camera")
     }
 };
 
@@ -76,6 +79,8 @@ export function Live(props) {
 
     const [Color, setColor] = useState("black")
 
+    const [name,setName]= useState("Host")
+
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
     );
@@ -97,7 +102,7 @@ export function Live(props) {
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
             if (uid === 1) setBroadcasterVideoState(state);
-            console.log(uid, state)
+            console.log(uid, state ,"rahul")
         });
 
         AgoraEngine.current.addListener(
@@ -105,6 +110,7 @@ export function Live(props) {
             (channel, uid, elapsed) => {
                 console.log('JoinChannelSuccess', channel, uid, elapsed);
                 setJoined(true);
+                setName(props.route.params.username)
             },
         );
 
@@ -205,7 +211,7 @@ export function Live(props) {
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
-                    <CommentSection />
+                    <CommentSection name={name}/>
 
                     <ButtonContainer
                         isBroadcaster={isBroadcaster}
