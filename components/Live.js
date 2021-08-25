@@ -12,6 +12,7 @@ import {
     Dimensions,
     Share,
     TouchableOpacity,
+    TextInput
 } from 'react-native';
 
 import RtcEngine, {
@@ -25,6 +26,8 @@ import RtcEngine, {
 import { useNavigation } from '@react-navigation/native';
 
 import requestCameraAndAudioPermission from './Permission';
+
+
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -70,6 +73,9 @@ export function Live(props) {
 
     const [joined, setJoined] = useState(false);
 
+    const [camera, setCamera] = useState("Back");
+
+    const [count, setCount] = useState('')
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
@@ -113,7 +119,7 @@ export function Live(props) {
 
     };
 
-    const onSwitchCamera = () => AgoraEngine.current.switchCamera();
+    const onSwitchCamera = () => AgoraEngine.current.switchCamera(camera === "Back" ? setCamera("Front") : setCamera("Back"));
 
     const onEndStream = () => {
         AgoraEngine.current.leaveChannel()
@@ -125,9 +131,13 @@ export function Live(props) {
         navigation.navigate('Home')
     }
 
-    useEffect(() => {
+    const api = `https://api.agora.io/dev/v1/channel/640eb5dc1cd24cb8ab8443820ef7386e`
+
+    useEffect( async () => {
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
+
         const uid = isBroadcaster ? 1 : 0;
+
         init().then(() =>
             AgoraEngine.current.joinChannel(
                 null,
@@ -136,6 +146,23 @@ export function Live(props) {
                 uid,
             ),
         );
+
+        const fetchapi = await fetch(api , {
+            headers: {
+                'Authorization': `Basic ZWU3NDM1NTk2Yjg4NDI2YTgzZDliNmViY2MyNDgyZDg6MzEwZjYwNTE1NGZmNDg1MWI2OTY2NWY2YTcyYTM4Y2U=`,
+            }
+        })
+
+        const response = await fetchapi.json();
+        
+        const user_count = response.data.channels[0].user_count ;
+        
+        console.log(user_count,"rahul");
+
+        setCount(user_count)
+
+        console.log(count)
+
         return () => {
             AgoraEngine.current.destroy();
         };
@@ -181,6 +208,24 @@ export function Live(props) {
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
+                    <Text style={{ position: 'absolute', top: 60, left: 20, fontSize: 50 }}>{count}</Text>
+
+                    <View style={{ position: 'absolute', bottom: 10, width: dimensions.width }}>
+
+
+                        <Text style={{ fontSize: 25, marginLeft: 10 }}>Rahul</Text>
+
+                        <View style={{ display: 'flex', flexDirection: 'row' }}>
+
+                            <TextInput placeholder="Comment" style={{ width: '80%', textAlign: 'center', fontSize: 24, fontWeight: 'bold' }} />
+
+                            <TouchableOpacity style={{ backgroundColor: '#fff', width: '20%', borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={styles.buttonText}>send</Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
+
                     <View style={styles.buttonContainer}>
 
                         {isBroadcaster ?
@@ -188,7 +233,7 @@ export function Live(props) {
                                 <Text style={styles.top}>55</Text>
 
                                 <TouchableOpacity style={styles.button} onPress={onSwitchCamera}>
-                                    <Text style={styles.buttonText}>Flip</Text>
+                                    <Text style={styles.buttonText}> {camera} </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={styles.button} onPress={onEndStream}>
@@ -198,7 +243,6 @@ export function Live(props) {
                                 <TouchableOpacity style={styles.button} onPress={onShare}>
                                     <Text style={styles.buttonText}>Share</Text>
                                 </TouchableOpacity>
-
                             </>
                             :
                             <>
@@ -208,6 +252,7 @@ export function Live(props) {
                             </>
                         }
                     </View>
+
                 </>
             )}
         </View>
@@ -231,7 +276,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         position: 'absolute',
-        bottom: 0,
+        top: 10,
     },
     button: {
         width: 100,
