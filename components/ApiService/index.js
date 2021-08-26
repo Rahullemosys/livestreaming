@@ -18,8 +18,8 @@ export const submitComment = (Name, comment, Id) => {
         }
 
         database()
-            .ref('user')
-            .push(values)
+            .ref('user/'+key)
+            .update(values)
             .then((snapshort) => {
                 resolve(snapshort)
                 console.log(snapshort, "snapshort")

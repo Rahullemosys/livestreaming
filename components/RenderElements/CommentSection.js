@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import {
     StyleSheet,
@@ -25,37 +25,26 @@ export function CommentSection(props) {
     const [Id, setId] = useState()
     const [comment, setComment] = useState("")
     const [printComment, setPrintComment] = useState("")
-    const [username,setUsername] = useState("")
+    const [username, setUsername] = useState("")
+    const [user, setUser] = useState([])
 
     useEffect((onChildAdd) => {
 
-        database()
-            .ref('/user')
-            .on('child_added', snapshot => {
-                console.log('A new node has been added', snapshot);
-                setPrintComment(snapshot.val().comment)
-                setUsername(snapshot.val().Name)
+        const userRef = database().ref('/user');
+        const Listner = userRef.on('value', snapshot => {
+
+            setUser([])
+            snapshot.forEach(childSnapshot => {
+
+                setUser(user => [...user, childSnapshot.val()]);
             })
-    
+        })
 
-        // return () => database().ref('/user').off('child_added', onChildAdd);
+        return () => {
+            userRef.off('value', Listner)
+        }
 
 
-        // database()
-        //     .ref('/user')
-        //     .once('value')
-        //     .then(snapshot => {
-        //         console.log('User data: ', snapshot.val());
-        //     });
-
-        // database()
-        //     .ref('/user')
-        //     .on('value', snapshot => {
-        //         // console.log('User data: ', snapshot.val());
-        //         setPrintComment(snapshot)
-        //     });
-
-            console.log(printComment)
 
 
     }, [Name])
@@ -81,15 +70,21 @@ export function CommentSection(props) {
             <View style={styles.TextBorder}>
 
                 <ScrollView>
-                    <View style={styles.TextRender}>
-                        <Text key={Id} style={styles.HeaderText}> {username === " "? Host : username} : </Text>
-                        <Text style={styles.CommentText}>{printComment}</Text>
-                    </View>
+
+
+                    {user.map((item, index) => {
+                        return (
+                            <View style={styles.TextRender}>
+                                <Text key={index} style={styles.HeaderText}>  {item.Name}: </Text>
+                                <Text style={styles.CommentText}>{item.comment}</Text>
+                            </View>
+                        )
+                    })}
+
                 </ScrollView>
 
             </View>
-
-
+            
             <View style={styles.commentIB}>
 
                 <TextInput
@@ -159,3 +154,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     }
 });
+
+
+
+// {username === " " ? Host : username}
