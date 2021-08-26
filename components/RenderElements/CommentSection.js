@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { submitComment } from "../ApiService";
+import { submitComment, commentRender } from "../ApiService";
+import { database } from "../../Setup";
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -24,7 +25,40 @@ export function CommentSection(props) {
     const [Id, setId] = useState()
     const [comment, setComment] = useState("")
     const [printComment, setPrintComment] = useState("")
+    const [username,setUsername] = useState("")
 
+    useEffect((onChildAdd) => {
+
+        database()
+            .ref('/user')
+            .on('child_added', snapshot => {
+                console.log('A new node has been added', snapshot);
+                setPrintComment(snapshot.val().comment)
+                setUsername(snapshot.val().Name)
+            })
+    
+
+        // return () => database().ref('/user').off('child_added', onChildAdd);
+
+
+        // database()
+        //     .ref('/user')
+        //     .once('value')
+        //     .then(snapshot => {
+        //         console.log('User data: ', snapshot.val());
+        //     });
+
+        // database()
+        //     .ref('/user')
+        //     .on('value', snapshot => {
+        //         // console.log('User data: ', snapshot.val());
+        //         setPrintComment(snapshot)
+        //     });
+
+            console.log(printComment)
+
+
+    }, [Name])
 
     if (props.name === "") {
         Name = Host
@@ -34,7 +68,6 @@ export function CommentSection(props) {
         submitComment(Name, comment, Id)
             .then((result) => {
                 console.log(result)
-                setPrintComment(comment)
                 setComment("")
             })
             .catch((error) => {
@@ -49,7 +82,7 @@ export function CommentSection(props) {
 
                 <ScrollView>
                     <View style={styles.TextRender}>
-                        <Text key={Id} style={styles.HeaderText}> {Name ? Name : Host} : </Text>
+                        <Text key={Id} style={styles.HeaderText}> {username === " "? Host : username} : </Text>
                         <Text style={styles.CommentText}>{printComment}</Text>
                     </View>
                 </ScrollView>

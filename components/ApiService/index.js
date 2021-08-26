@@ -11,14 +11,11 @@ export const submitComment = (Name, comment, Id) => {
                 .ref()
                 .push().key
         }
-
         let values = {
             Id: key,
             Name: Name,
             comment: comment,
         }
-
-        console.log(values, "console form index")
 
         database()
             .ref('user')
@@ -31,7 +28,19 @@ export const submitComment = (Name, comment, Id) => {
                 console.log(error, "error")
             })
 
- 
 
+
+    })
+}
+
+export const commentRender = () => {
+    return new Promise(function (resolve, reject) {
+        database()
+            .ref('/user')
+            .on('child_added', snapshot => {
+                // console.log('A new node has been added', snapshot.val());
+            })
+
+        return () => database().ref('/users').off('child_added', onChildAdd);
     })
 }
