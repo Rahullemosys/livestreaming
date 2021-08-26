@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
     StyleSheet,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { submitComment } from "../ApiService";
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -18,17 +19,38 @@ const dimensions = {
 };
 
 export function CommentSection(props) {
+    const Name = props.name;
+    const Host = "Host"
+    const [Id, setId] = useState()
+    const [comment, setComment] = useState("")
+    const [printComment, setPrintComment] = useState("")
+
+
+    if (props.name === "") {
+        Name = Host
+    }
+
+    const onSubmit = () => {
+        submitComment(Name, comment, Id)
+            .then((result) => {
+                console.log(result)
+                setPrintComment(comment)
+                setComment("")
+            })
+            .catch((error) => {
+                console.log(error, "error");
+            })
+    }
 
     return (
         <View style={styles.commentView}>
-
 
             <View style={styles.TextBorder}>
 
                 <ScrollView>
                     <View style={styles.TextRender}>
-                        <Text style={styles.HeaderText}> {props.name} : </Text>
-                        <Text style={styles.CommentText}>In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available. </Text>
+                        <Text key={Id} style={styles.HeaderText}> {Name ? Name : Host} : </Text>
+                        <Text style={styles.CommentText}>{printComment}</Text>
                     </View>
                 </ScrollView>
 
@@ -37,9 +59,15 @@ export function CommentSection(props) {
 
             <View style={styles.commentIB}>
 
-                <TextInput placeholder="comment" placeholderTextColor="black" style={styles.commentInput} />
+                <TextInput
+                    placeholder="comment"
+                    placeholderTextColor="black"
+                    style={styles.commentInput}
+                    value={comment}
+                    onChangeText={(text) => { setComment(text) }}
+                />
 
-                <TouchableOpacity style={styles.commentButton} onPress={props.onSubmit}>
+                <TouchableOpacity style={styles.commentButton} onPress={onSubmit}>
                     <FontAwesome5 name={'arrow-circle-right'} solid size={50} />
                 </TouchableOpacity>
 
@@ -79,8 +107,8 @@ const styles = StyleSheet.create({
     },
     TextBorder: {
         width: '100%',
-        height: 300,
-        padding: 20,
+        height: 250,
+        padding: 15,
     },
     TextRender: {
         flex: 1,
@@ -93,7 +121,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     CommentText: {
-        width:'75%',
+        width: '75%',
         fontSize: 20,
         color: '#fff',
     }

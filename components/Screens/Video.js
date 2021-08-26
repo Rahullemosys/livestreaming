@@ -73,6 +73,8 @@ export const Video = (props) => {
 
         init()
 
+        return init();
+
         console.log('i fire once');
 
     }, [10])
