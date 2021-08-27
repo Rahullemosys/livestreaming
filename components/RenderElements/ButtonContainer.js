@@ -43,7 +43,7 @@ export function ButtonContainer(props) {
                             <FontAwesome5 name={'sign-out-alt'} solid size={30} color={props.Color} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.buttons} onPress={props.onShare}>
+                        <TouchableOpacity style={styles.button} onPress={props.onShare}>
                             <FontAwesome5 name={'share-alt-square'} solid size={30} color={props.Color} />
                         </TouchableOpacity>
                     </View>
@@ -80,9 +80,5 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 17,
     },
-    buttons:{
-        position: 'absolute',
-        left: -250,
-        top: 15
-    }
+    
 });

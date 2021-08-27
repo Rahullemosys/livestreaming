@@ -21,21 +21,22 @@ const dimensions = {
 
 export function CommentSection(props) {
     const Name = props.name;
+    const HostName = props.hostName;
     const Host = "Host"
     const [Id, setId] = useState()
     const [comment, setComment] = useState("")
-    const [printComment, setPrintComment] = useState("")
-    const [username, setUsername] = useState("")
     const [user, setUser] = useState([])
 
-    useEffect((onChildAdd) => {
+    const [hostName, setHostName] = useState(HostName)
 
+    useEffect(() => {
+        console.log(HostName)
+        setHostName(HostName)
         const userRef = database().ref('/user');
         const Listner = userRef.on('value', snapshot => {
 
             setUser([])
             snapshot.forEach(childSnapshot => {
-
                 setUser(user => [...user, childSnapshot.val()]);
             })
         })
@@ -44,17 +45,10 @@ export function CommentSection(props) {
             userRef.off('value', Listner)
         }
 
-
-
-
     }, [Name])
 
-    if (props.name === "") {
-        Name = Host
-    }
-
     const onSubmit = () => {
-        submitComment(Name, comment, Id)
+        submitComment(Name, comment, Id, hostName)
             .then((result) => {
                 console.log(result)
                 setComment("")
@@ -71,11 +65,10 @@ export function CommentSection(props) {
 
                 <ScrollView>
 
-
                     {user.map((item, index) => {
                         return (
-                            <View style={styles.TextRender}>
-                                <Text key={index} style={styles.HeaderText}>  {item.Name}: </Text>
+                            <View style={styles.TextRender} key={index}>
+                                <Text style={styles.HeaderText}> {item.Name}: </Text>
                                 <Text style={styles.CommentText}>{item.comment}</Text>
                             </View>
                         )
@@ -84,7 +77,7 @@ export function CommentSection(props) {
                 </ScrollView>
 
             </View>
-            
+
             <View style={styles.commentIB}>
 
                 <TextInput
@@ -92,7 +85,7 @@ export function CommentSection(props) {
                     placeholderTextColor="black"
                     style={styles.commentInput}
                     value={comment}
-                    onChangeText={(text) => { setComment(text) }}
+                    onChangeText={(text) => {setComment(text)}}
                 />
 
                 <TouchableOpacity style={styles.commentButton} onPress={onSubmit}>

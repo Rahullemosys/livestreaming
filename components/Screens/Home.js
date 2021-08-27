@@ -15,7 +15,7 @@ export function Home() {
 
 
   const createLive = () => {
-    navigation.navigate('Live', { type: 'create', channel: uuid() });
+    navigation.navigate('Live', { type: 'create', channel: uuid(),HostName:"Hostname" });
   }
 
   const onAdd = () =>

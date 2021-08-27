@@ -26,7 +26,7 @@ import { CommentSection, ButtonContainer, ActivityIndicate } from "../RenderElem
 
 import requestCameraAndAudioPermission from './Permission';
 
-
+import { deleteComments } from "../ApiService";
 
 const dimensions = {
     width: Dimensions.get('window').width,
@@ -43,13 +43,15 @@ const videoStateMessage = (state) => {
 
         case VideoRemoteState.Failed:
             return 'Network Error';
-        
+
         // case VideoRemoteState.Starting:
         //     return alert("Camera")
     }
 };
 
 export function Live(props) {
+
+    const NameHost = props.route.params.HostName
 
     const navigation = useNavigation();
 
@@ -81,7 +83,7 @@ export function Live(props) {
 
     const [Color, setColor] = useState("black")
 
-    const [name,setName]= useState("Host")
+    const [name, setName] = useState("Host")
 
     const [broadcasterVideoState, setBroadcasterVideoState] = useState(
         VideoRemoteState.Decoding,
@@ -97,14 +99,18 @@ export function Live(props) {
 
         AgoraEngine.current.enableVideo();
 
-        AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting);
+        AgoraEngine.current.setChannelProfile(ChannelProfile.LiveBroadcasting, () => {
+            console.log("setChannelProfile")
+        });
         if (isBroadcaster)
 
-            AgoraEngine.current.setClientRole(ClientRole.Broadcaster);
+            AgoraEngine.current.setClientRole(ClientRole.Broadcaster, () => {
+                console.log("setClientRole")
+            });
 
         AgoraEngine.current.addListener('RemoteVideoStateChanged', (uid, state) => {
             if (uid === 1) setBroadcasterVideoState(state);
-            console.log(uid, state ,"rahul")
+            console.log(uid, state, "rahul")
         });
 
         AgoraEngine.current.addListener(
@@ -113,6 +119,7 @@ export function Live(props) {
                 console.log('JoinChannelSuccess', channel, uid, elapsed);
                 setJoined(true);
                 setName(props.route.params.username)
+                isBroadcaster === true ? deleteComments() : null
             },
         );
 
@@ -143,7 +150,7 @@ export function Live(props) {
 
     const onCamera = () => {
         console.log("camera Enable Disable Function called")
-        noCamera === "off" ? AgoraEngine.current.disableVideo(setNoCamera("turn on"),alert("Camera is Disable Now"))
+        noCamera === "off" ? AgoraEngine.current.disableVideo(setNoCamera("turn on"), alert("Camera is Disable Now"))
             :
             AgoraEngine.current.enableVideo(setNoCamera("off"))
     }
@@ -155,13 +162,12 @@ export function Live(props) {
     }
 
     const onLeave = () => {
+        console.log("Leav channel")
         AgoraEngine.current.destroy()
         navigation.navigate('Home')
     }
 
-    const api = `https://api.agora.io/dev/v1/channel/640eb5dc1cd24cb8ab8443820ef7386e`
-
-    useEffect( async () => {
+    useEffect(async () => {
         if (Platform.OS === 'android') requestCameraAndAudioPermission();
 
         const uid = isBroadcaster ? 1 : 0;
@@ -175,12 +181,10 @@ export function Live(props) {
             ),
         );
 
-        // console.log(props.route.params.username)
-
         return () => {
             AgoraEngine.current.destroy();
         };
-    }, []);
+    }, [AgoraEngine]);
 
     const renderHost = () =>
         broadcasterVideoState === VideoRemoteState.Decoding ? (
@@ -215,7 +219,7 @@ export function Live(props) {
 
                     {isBroadcaster ? renderLocal() : renderHost()}
 
-                    <CommentSection name={name}/>
+                    <CommentSection name={name} hostName={NameHost}/>
 
                     <ButtonContainer
                         isBroadcaster={isBroadcaster}

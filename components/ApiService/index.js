@@ -1,6 +1,6 @@
 import { database } from "../../Setup";
 
-export const submitComment = (Name, comment, Id) => {
+export const submitComment = (Name, comment, Id, hostName) => {
     return new Promise(function (resolve, reject) {
 
         let key;
@@ -11,14 +11,17 @@ export const submitComment = (Name, comment, Id) => {
                 .ref()
                 .push().key
         }
-        let values = {
+
+        const values = {
             Id: key,
             Name: Name,
             comment: comment,
         }
 
+        console.log(hostName,"function call")
+
         database()
-            .ref('user/'+key)
+            .ref('user/' + key)
             .update(values)
             .then((snapshort) => {
                 resolve(snapshort)
@@ -27,20 +30,13 @@ export const submitComment = (Name, comment, Id) => {
                 reject(error)
                 console.log(error, "error")
             })
-
-
-
     })
 }
 
-export const commentRender = () => {
+export const deleteComments = () => {
     return new Promise(function (resolve, reject) {
-        database()
-            .ref('/user')
-            .on('child_added', snapshot => {
-                // console.log('A new node has been added', snapshot.val());
-            })
 
-        return () => database().ref('/users').off('child_added', onChildAdd);
+        database().ref('/user').remove();
+
     })
 }
